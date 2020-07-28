@@ -1,0 +1,69 @@
+import { SEP, SEP_PATTERN } from "./separator.ts";
+import { globrex } from "./_globrex.ts";
+import { join, normalize } from "./mod.ts";
+import { assert } from "../_util/assert.ts";
+export function globToRegExp(glob, { extended = false, globstar = true } = {}) {
+    const result = globrex(glob, {
+        extended,
+        globstar,
+        strict: false,
+        filepath: true,
+    });
+    assert(result.path != null);
+    return result.path.regex;
+}
+export function isGlob(str) {
+    const chars = { "{": "}", "(": ")", "[": "]" };
+    const regex = /\\(.)|(^!|\*|[\].+)]\?|\[[^\\\]]+\]|\{[^\\}]+\}|\(\?[:!=][^\\)]+\)|\([^|]+\|[^\\)]+\))/;
+    if (str === "") {
+        return false;
+    }
+    let match;
+    while ((match = regex.exec(str))) {
+        if (match[2])
+            return true;
+        let idx = match.index + match[0].length;
+        const open = match[1];
+        const close = open ? chars[open] : null;
+        if (open && close) {
+            const n = str.indexOf(close, idx);
+            if (n !== -1) {
+                idx = n + 1;
+            }
+        }
+        str = str.slice(idx);
+    }
+    return false;
+}
+export function normalizeGlob(glob, { globstar = false } = {}) {
+    if (glob.match(/\0/g)) {
+        throw new Error(`Glob contains invalid characters: "${glob}"`);
+    }
+    if (!globstar) {
+        return normalize(glob);
+    }
+    const s = SEP_PATTERN.source;
+    const badParentPattern = new RegExp(`(?<=(${s}|^)\\*\\*${s})\\.\\.(?=${s}|$)`, "g");
+    return normalize(glob.replace(badParentPattern, "\0")).replace(/\0/g, "..");
+}
+export function joinGlobs(globs, { extended = false, globstar = false } = {}) {
+    if (!globstar || globs.length == 0) {
+        return join(...globs);
+    }
+    if (globs.length === 0)
+        return ".";
+    let joined;
+    for (const glob of globs) {
+        const path = glob;
+        if (path.length > 0) {
+            if (!joined)
+                joined = path;
+            else
+                joined += `${SEP}${path}`;
+        }
+    }
+    if (!joined)
+        return ".";
+    return normalizeGlob(joined, { extended, globstar });
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2xvYi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbImdsb2IudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBR0EsT0FBTyxFQUFFLEdBQUcsRUFBRSxXQUFXLEVBQUUsTUFBTSxnQkFBZ0IsQ0FBQztBQUNsRCxPQUFPLEVBQUUsT0FBTyxFQUFFLE1BQU0sZUFBZSxDQUFDO0FBQ3hDLE9BQU8sRUFBRSxJQUFJLEVBQUUsU0FBUyxFQUFFLE1BQU0sVUFBVSxDQUFDO0FBQzNDLE9BQU8sRUFBRSxNQUFNLEVBQUUsTUFBTSxvQkFBb0IsQ0FBQztBQW1DNUMsTUFBTSxVQUFVLFlBQVksQ0FDMUIsSUFBWSxFQUNaLEVBQUUsUUFBUSxHQUFHLEtBQUssRUFBRSxRQUFRLEdBQUcsSUFBSSxLQUEwQixFQUFFO0lBRS9ELE1BQU0sTUFBTSxHQUFHLE9BQU8sQ0FBQyxJQUFJLEVBQUU7UUFDM0IsUUFBUTtRQUNSLFFBQVE7UUFDUixNQUFNLEVBQUUsS0FBSztRQUNiLFFBQVEsRUFBRSxJQUFJO0tBQ2YsQ0FBQyxDQUFDO0lBQ0gsTUFBTSxDQUFDLE1BQU0sQ0FBQyxJQUFJLElBQUksSUFBSSxDQUFDLENBQUM7SUFDNUIsT0FBTyxNQUFNLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQztBQUMzQixDQUFDO0FBR0QsTUFBTSxVQUFVLE1BQU0sQ0FBQyxHQUFXO0lBQ2hDLE1BQU0sS0FBSyxHQUEyQixFQUFFLEdBQUcsRUFBRSxHQUFHLEVBQUUsR0FBRyxFQUFFLEdBQUcsRUFBRSxHQUFHLEVBQUUsR0FBRyxFQUFFLENBQUM7SUFFdkUsTUFBTSxLQUFLLEdBQUcsd0ZBQXdGLENBQUM7SUFFdkcsSUFBSSxHQUFHLEtBQUssRUFBRSxFQUFFO1FBQ2QsT0FBTyxLQUFLLENBQUM7S0FDZDtJQUVELElBQUksS0FBNkIsQ0FBQztJQUVsQyxPQUFPLENBQUMsS0FBSyxHQUFHLEtBQUssQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUMsRUFBRTtRQUNoQyxJQUFJLEtBQUss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

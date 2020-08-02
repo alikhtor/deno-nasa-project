@@ -526,8 +526,13 @@
         "signature": "-82870025626",
         "affectsGlobalScope": false
       },
+      "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/api.ts": {
+        "version": "c26cad14b311c6ef4f40c8df7762857988aa480063dd5f8e94fa8bcd343536da",
+        "signature": "-10890072249",
+        "affectsGlobalScope": false
+      },
       "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/mod.ts": {
-        "version": "d1d6d579873fea116a7b071a3d9f71a16023b7bfe0e0dfa11cdf5378826cb4c2",
+        "version": "a4360a08b10d65f2e360338d750d5fd450de5611c0d032616892318c163f6eb5",
         "signature": "-3531856636",
         "affectsGlobalScope": false
       }
@@ -551,7 +556,11 @@
       "tsBuildInfoFile": "./tsbuildinfo.json"
     },
     "referencedMap": {
+      "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/api.ts": [
+        "https://deno.land/x/oak@v6.0.1/mod.ts"
+      ],
       "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/mod.ts": [
+        "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/api.ts",
         "https://deno.land/x/oak@v6.0.1/mod.ts"
       ],
       "https://deno.land/std@0.61.0/async/mod.ts": [
@@ -814,6 +823,9 @@
       ]
     },
     "exportedModulesMap": {
+      "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/api.ts": [
+        "https://deno.land/x/oak@v6.0.1/mod.ts"
+      ],
       "https://deno.land/std@0.61.0/async/mod.ts": [
         "https://deno.land/std@0.61.0/async/deferred.ts",
         "https://deno.land/std@0.61.0/async/delay.ts",
@@ -1001,6 +1013,7 @@
       "asset:///lib.esnext.intl.d.ts",
       "asset:///lib.esnext.promise.d.ts",
       "asset:///lib.esnext.string.d.ts",
+      "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/api.ts",
       "file:///C:/Users/admin/Documents/code/deno/deno-nasa-project/mod.ts",
       "https://deno.land/std@0.61.0/_util/assert.ts",
       "https://deno.land/std@0.61.0/_util/has_own_property.ts",

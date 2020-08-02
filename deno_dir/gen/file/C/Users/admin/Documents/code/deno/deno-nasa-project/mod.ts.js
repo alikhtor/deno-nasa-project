@@ -1,23 +1,33 @@
-import { Application } from "https://deno.land/x/oak@v6.0.1/mod.ts";
+import { Application, send } from 'https://deno.land/x/oak@v6.0.1/mod.ts';
+import api from './api.ts';
 const app = new Application();
 const PORT = 8000;
-app.use(ctx => {
-    console.log(ctx.request.body);
-    ctx.response.body = `                                             _______ _______ _______
-                                            |   |   |    ___|    |  |
-                                            |       |    ___|       |
-                                            |__|_|__|_______|__|____|
-                     _______ ______ _______ _______    _______ _______ ______ _______ _______
-                    |    ___|   __ \\       |   |   |  |    ___|   _   |   __ \\_     _|   |   |
-                    |    ___|      <   -   |       |  |    ___|       |      < |   | |       |
-                    |___|   |___|__|_______|__|_|__|  |_______|___|___|___|__| |___| |___|___|
-                                            Mission Control API`;
+app.use(async (ctx, next) => {
+    const start = Date.now();
+    await next();
+    const delta = Date.now() - start;
+    ctx.response.headers.set('X-RESPONSE-TIME', `${delta}ms`);
+});
+app.use(api.routes());
+app.use(api.allowedMethods());
+app.use(async (ctx) => {
+    const filePath = ctx.request.url.pathname;
+    const fileWhiteList = [
+        '/index.html',
+        '/javascripts/script.js',
+        '/stylesheets/style.css',
+        '/images/favicon.png'
+    ];
+    if (fileWhiteList.includes(filePath)) {
+        await send(ctx, filePath, {
+            root: `${Deno.cwd()}/public`
+        });
+    }
 });
 if (import.meta.main) {
-    console.log(import.meta);
-    await app.listen({
+    app.listen({
         port: PORT
     });
-    console.log(`Listen on port http://localhost:${PORT}`);
+    console.log(`Listen on http://localhost:${PORT}`);
 }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibW9kLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsibW9kLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sRUFBRSxXQUFXLEVBQUUsTUFBTSx1Q0FBdUMsQ0FBQztBQUVwRSxNQUFNLEdBQUcsR0FBRyxJQUFJLFdBQVcsRUFBRSxDQUFDO0FBQzlCLE1BQU0sSUFBSSxHQUFHLElBQUksQ0FBQztBQUVsQixHQUFHLENBQUMsR0FBRyxDQUFDLEdBQUcsQ0FBQyxFQUFFO0lBQ1YsT0FBTyxDQUFDLEdBQUcsQ0FBQyxHQUFHLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDO0lBRTlCLEdBQUcsQ0FBQyxRQUFRLENBQUMsSUFBSSxHQUFHOzs7Ozs7OztnRUFRd0MsQ0FBQztBQUNqRSxDQUFDLENBQUMsQ0FBQztBQUVILElBQUksTUFBTSxDQUFDLElBQUksQ0FBQyxJQUFJLEVBQUU7SUFDbEIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUM7SUFDekIsTUFBTSxHQUFHLENBQUMsTUFBTSxDQUFDO1FBQ2IsSUFBSSxFQUFFLElBQUk7S0FDYixDQUFDLENBQUM7SUFDSCxPQUFPLENBQUMsR0FBRyxDQUFDLG1DQUFtQyxJQUFJLEVBQUUsQ0FBQyxDQUFDO0NBQzFEIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibW9kLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsibW9kLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sRUFBRSxXQUFXLEVBQUUsSUFBSSxFQUFFLE1BQU0sdUNBQXVDLENBQUM7QUFFMUUsT0FBTyxHQUFHLE1BQU0sVUFBVSxDQUFDO0FBRTNCLE1BQU0sR0FBRyxHQUFHLElBQUksV0FBVyxFQUFFLENBQUM7QUFDOUIsTUFBTSxJQUFJLEdBQUcsSUFBSSxDQUFDO0FBRWxCLEdBQUcsQ0FBQyxHQUFHLENBQUMsS0FBSyxFQUFFLEdBQUcsRUFBRSxJQUFJLEVBQUUsRUFBRTtJQUN4QixNQUFNLEtBQUssR0FBRyxJQUFJLENBQUMsR0FBRyxFQUFFLENBQUM7SUFDekIsTUFBTSxJQUFJLEVBQUUsQ0FBQztJQUNiLE1BQU0sS0FBSyxHQUFHLElBQUksQ0FBQyxHQUFHLEVBQUUsR0FBRyxLQUFLLENBQUM7SUFDakMsR0FBRyxDQUFDLFFBQVEsQ0FBQyxPQUFPLENBQUMsR0FBRyxDQUFDLGlCQUFpQixFQUFFLEdBQUcsS0FBSyxJQUFJLENBQUMsQ0FBQztBQUM5RCxDQUFDLENBQUMsQ0FBQztBQUVILEdBQUcsQ0FBQyxHQUFHLENBQUMsR0FBRyxDQUFDLE1BQU0sRUFBRSxDQUFDLENBQUM7QUFDdEIsR0FBRyxDQUFDLEdBQUcsQ0FBQyxHQUFHLENBQUMsY0FBYyxFQUFFLENBQUMsQ0FBQztBQUU5QixHQUFHLENBQUMsR0FBRyxDQUFDLEtBQUssRUFBRSxHQUFHLEVBQUUsRUFBRTtJQUNsQixNQUFNLFFBQVEsR0FBRyxHQUFHLENBQUMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUM7SUFDMUMsTUFBTSxhQUFhLEdBQUc7UUFDbEIsYUFBYTtRQUNiLHdCQUF3QjtRQUN4Qix3QkFBd0I7UUFDeEIscUJBQXFCO0tBQ3hCLENBQUE7SUFDRCxJQUFJLGFBQWEsQ0FBQyxRQUFRLENBQUMsUUFBUSxDQUFDLEVBQUU7UUFDbEMsTUFBTSxJQUFJLENBQUMsR0FBRyxFQUFFLFFBQVEsRUFBRTtZQUN0QixJQUFJLEVBQUUsR0FBRyxJQUFJLENBQUMsR0FBRyxFQUFFLFNBQVM7U0FDL0IsQ0FBQyxDQUFDO0tBQ047QUFDTCxDQUFDLENBQUMsQ0FBQTtBQUVGLElBQUksTUFBTSxDQUFDLElBQUksQ0FBQyxJQUFJLEVBQUU7SUFDbEIsR0FBRyxDQUFDLE1BQU0sQ0FBQztRQUNQLElBQUksRUFBRSxJQUFJO0tBQ2IsQ0FBQyxDQUFDO0lBQ0gsT0FBTyxDQUFDLEdBQUcsQ0FBQyw4QkFBOEIsSUFBSSxFQUFFLENBQUMsQ0FBQztDQUNyRCJ9
